@@ -27,13 +27,24 @@
         }
 
         .container {
+            display: flex;
             text-align: center;
             background: #333;
             padding: 40px 60px;
             border-radius: 15px;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
             width: 80%;
-            max-width: 700px;
+            max-width: 1000px;
+            justify-content: space-between;
+        }
+
+        .left-section {
+            width: 60%;
+        }
+
+        .right-section {
+            width: 35%;
+            text-align: center;
         }
 
         input {
@@ -95,18 +106,48 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
         }
 
+        .avatar-frame {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #FFD700; /* 黄色边框 */
+            margin-top: 20px;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+        }
+
+        .avatar-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        input[type="file"] {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>币安灵魂绑定</h1>
-        <input type="text" id="nameInput" placeholder="请输入你的名字">
-        <button onclick="addNameToImage()">生成图片</button>
+        <div class="left-section">
+            <h1>币安灵魂绑定</h1>
+            <input type="text" id="nameInput" placeholder="请输入你的名字">
+            <button onclick="addNameToImage()">生成图片</button>
+            <canvas id="imageCanvas" width="700" height="400"></canvas>
+            <!-- 下载按钮 -->
+            <button class="download-btn" id="downloadBtn" onclick="downloadImage()" style="display: none;">下载图片</button>
+        </div>
         
-        <canvas id="imageCanvas" width="700" height="400"></canvas>
-
-        <!-- 下载按钮 -->
-        <button class="download-btn" id="downloadBtn" onclick="downloadImage()" style="display: none;">下载图片</button>
+        <div class="right-section">
+            <div class="avatar-frame" id="avatarFrame">
+                <img id="avatarImage" alt="头像"> <!-- 默认头像 -->
+            </div>
+            <input type="file" id="avatarUpload" onchange="uploadAvatar()" accept="image/*">
+        </div>
     </div>
 
     <script>
@@ -156,6 +197,20 @@
                 // 绘制名字和随机数
                 ctx.fillText(displayText, x, y);
 
+                // 绘制头像（如果有上传）
+                const avatarImage = document.getElementById("avatarImage");
+                const avatarSize = 150;  // 设置头像大小
+                const avatarX = canvas.width - avatarSize - 98;  // 头像位置：右下角
+                const avatarY = canvas.height / 2 - avatarSize / 2;  // 头像垂直居中
+
+                // 在Canvas上绘制圆形头像
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
+                ctx.clip();
+                ctx.drawImage(avatarImage, avatarX, avatarY, avatarSize, avatarSize);
+                ctx.restore();
+
                 // 显示下载按钮
                 document.getElementById("downloadBtn").style.display = "block";
             };
@@ -170,6 +225,19 @@
                 result += characters[randomIndex];
             }
             return result;
+        }
+
+        // 上传头像
+        function uploadAvatar() {
+            const file = document.getElementById("avatarUpload").files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const avatarImage = document.getElementById("avatarImage");
+                    avatarImage.src = event.target.result;  // 设置头像为上传的图片
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         // 下载生成的图片
